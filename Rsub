@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Pistolas</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #game-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .gun {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 40px;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        #bot-gun {
+            left: 10%;
+            background-color: red;
+            background-image: url('https://cdn.pixabay.com/photo/2014/03/25/15/25/pistol-297802_960_720.png');
+            transform: rotateY(180deg) translateY(-50%);
+        }
+        #player-gun {
+            right: 10%;
+            background-color: blue;
+            background-image: url('https://cdn.pixabay.com/photo/2014/03/25/15/25/pistol-297802_960_720.png');
+        }
+        #fire-button {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        #level-indicator {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+        }
+        #start-screen, #game-over-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+        #start-button, #retry-button {
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: 2px solid;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        #start-button {
+            border-color: red blue;
+        }
+        #game-over-screen {
+            display: none;
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="start-screen">
+        <button id="start-button">COMENZAR</button>
+    </div>
+
+    <div id="game-container">
+        <div id="level-indicator">Nivel 1</div>
+        <div id="bot-gun" class="gun">0</div>
+        <div id="player-gun" class="gun">0</div>
+        <button id="fire-button">DISPARAR</button>
+    </div>
+
+    <div id="game-over-screen">
+        <h1>PERDISTE</h1>
+        <p id="lost-level"></p>
+        <button id="retry-button">REINTENTAR</button>
+    </div>
+
+    <script>
+        const startScreen = document.getElementById('start-screen');
+        const gameContainer = document.getElementById('game-container');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startButton = document.getElementById('start-button');
+        const retryButton = document.getElementById('retry-button');
+        const fireButton = document.getElementById('fire-button');
+        const botGun = document.getElementById('bot-gun');
+        const playerGun = document.getElementById('player-gun');
+        const levelIndicator = document.getElementById('level-indicator');
+        const lostLevel = document.getElementById('lost-level');
+
+        const levels = [5000, 4000, 3000, 2000, 1000];
+        let currentLevel = 0;
+        let botShots = 0;
+        let playerShots = 0;
+        let botInterval;
+
+        startButton.addEventListener('click', startGame);
+        retryButton.addEventListener('click', restartGame);
+        fireButton.addEventListener('click', playerShoot);
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+            gameOverScreen.style.display = 'none';
+            currentLevel = 0;
+            botShots = 0;
+            playerShots = 0;
+            botGun.textContent = botShots;
+            playerGun.textContent = playerShots;
+            levelIndicator.textContent = 'Nivel 1';
+            startLevel();
+        }
+
+        function startLevel() {
+            botShots = 0;
+            playerShots = 0;
+            botGun.textContent = botShots;
+            playerGun.textContent = playerShots;
+            botInterval = setInterval(botShoot, levels[currentLevel] / 8);
+        }
+
+        function botShoot() {
+            botShots++;
+            botGun.textContent = botShots;
+            if (botShots >= 8) {
+                clearInterval(botInterval);
+                checkGameOver();
+            }
+        }
+
+        function playerShoot() {
+            playerShots++;
+            playerGun.textContent = playerShots;
+            if (playerShots >= 8) {
+                clearInterval(botInterval);
+                nextLevel();
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel >= levels.length) {
+                alert("¡Felicidades! Ganaste el juego.");
+                restartGame();
+            } else {
+                levelIndicator.textContent = 'Nivel ' + (currentLevel + 1);
+                startLevel();
+            }
+        }
+
+        function checkGameOver() {
+            if (botShots >= 8 && playerShots < 8) {
+                gameContainer.style.display = 'none';
+                gameOverScreen.style.display = 'flex';
+                lostLevel.textContent = 'Perdiste en el Nivel ' + (currentLevel + 1);
+            }
+        }
+
+        function restartGame() {
+            startScreen.style.display = 'flex';
+            gameContainer.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
